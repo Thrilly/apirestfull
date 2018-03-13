@@ -1,22 +1,22 @@
 var app = require("../config/config");
 
-function Domain() {
+function User() {
 }
 
-Domain.getDomains = function(callback){
-	var sql = "SELECT id, slug, name, description FROM domain";
+User.getUsers = function(callback){
+	var sql = "SELECT * FROM user";
     app.con.query(sql, function (err, result) {
        if (err) throw err;
        return callback(result);
     });
 };
 
-Domain.getDomain = function(dname, callback){
-	var sql = "SELECT * FROM domain where name = '"+dname+"'";
+User.getUser = function(id, callback){
+	var sql = "SELECT id, username FROM user where id = '"+id+"'";
     app.con.query(sql, function (err, result) {
        if (err) throw err;
        return callback(result[0]);
     });
 };
 
-module.exports = Domain;
+module.exports = User;
