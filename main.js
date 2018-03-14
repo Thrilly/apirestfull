@@ -22,18 +22,26 @@ server.get('/api/domains.:ext', function(req, res) {
     
 })
 
-.get('/api/domains/mailer.:ext', function(req, res) {
+.get('/api/domains/:domain.:ext', function(req, res) {
     var ext = req.params.ext;
+    var domain = req.params.domain;
     res.setHeader('Content-Type', 'application/json');
 
     if (ext == "json") {
-            Domain.getDomain('mailer', function(d){
-                User.getUser(d.user_id, function(u){
-                    DomainLang.getDomainLangs(d.id, function(dl){
-                        var datas = {langs: dl, id: d.id, slug: d.slug, name: d.name, description: d.description, creator: u, created_at: d.created_at}
-                        res.send({ code: 200, message: 'success', datas: datas});
-                    });
-                });
+            Domain.getDomain(domain, function(d){
+                if (d) {
+                    User.getUser(d.user_id, function(u){
+                        DomainLang.getDomainLangs(d.id, function(dl){
+
+                            var datas = {langs: dl, id: d.id, slug: d.slug, name: d.name, description: d.description, creator: u, created_at: d.created_at}
+                            res.send({ code: 200, message: 'success', datas: datas});
+
+                        });
+                    });  
+                }else{
+                    res.status(400).send({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
+                }
+                
             });
         
     }else{
