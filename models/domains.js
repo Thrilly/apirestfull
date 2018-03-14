@@ -11,4 +11,17 @@ Domain.getDomains = function(callback){
     });
 };
 
+Domain.getDomain = function(dname, callback){
+	var sql = "SELECT * FROM domain where name = '"+dname+"'";
+    app.con.query(sql, function (err, result) {
+       	// if (err) throw err;
+       	console.log(result.length != 0);
+       	if (result.length != 0) {
+       		return callback(result[0]);
+       	}else{
+       		return callback(false);
+       	}
+    });
+};
+
 module.exports = Domain;
