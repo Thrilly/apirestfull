@@ -30,14 +30,12 @@ Translation.getTranslationsToLangByDomain = function(domain_id, callback){
             var resp = {};
             for (var i = 0; i < result.length; i++) {
                 if (!resp[result[i].id]) {
-                    resp[result[i].id] = [];
+                    resp[result[i].id] = {};
                 }
-                // console.log(result[i].id+'|'+result[i].lang_id);
-                var subtab = {};
-                subtab[result[i].lang_id] = {};
-                subtab[result[i].lang_id] = result[i].trans;
-                // resp[result[i].id][result[i].lang_id] = result[i].trans;
-                resp[result[i].id].push(subtab);
+                if (!resp[result[i].id][result[i].lang_id]) {
+                    resp[result[i].id][result[i].lang_id] = {};
+                }
+                resp[result[i].id][result[i].lang_id] = result[i].trans;
                 
             }
             return callback(resp);

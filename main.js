@@ -15,4 +15,4 @@ server.use('/api/', require('./controllers/domains'))
 
 });
 
-server.listen(8888);
+server.listen(80);
