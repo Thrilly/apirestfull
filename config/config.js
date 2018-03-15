@@ -5,9 +5,9 @@ exports.express         = require('express');
 exports.con             = mysql.createConnection(params.db);
 
 exports.model           = {
-    domains: require('../models/domains'),
-    users: require('../models/users'),
-    translations: require('../models/translations'),
+    domains: require('../models/Domains'),
+    users: require('../models/Users'),
+    translations: require('../models/Translations'),
 };
 
 exports.availableExt    = {
