@@ -1,15 +1,22 @@
-var mysql 			= require('mysql');
-var params 			= require('./parameters');
+var mysql               = require('mysql');
+var params              = require('./parameters');
 
-exports.express 	= require('express');
-exports.con 		= mysql.createConnection(params.db);
+exports.fs 				= require('fs')
+exports.morgan 			= require('morgan')
+exports.path 			= require('path')
 
-exports.model       =   {
-                            domains: require('../models/domains'),
-                            users: require('../models/users'),
-                            translations: require('../models/translations'),
-                        };
+exports.express         = require('express');
+exports.con             = mysql.createConnection(params.db);
 
-exports.requiredExt =   {
-                            json:"json",
-                        };
+exports.model           = {
+    domains: require('../models/Domains'),
+    users: require('../models/Users'),
+    translations: require('../models/Translations'),
+};
+
+exports.availableExt    = {
+    json    :true,
+    xml     :false,
+    html    :false,
+    json    :false,
+};
