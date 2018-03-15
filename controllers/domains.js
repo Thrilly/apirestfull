@@ -51,7 +51,7 @@ controller.route('/domains/:domain.:ext')
     
 });
 
-controller.route('/domains/:domain/translation.:ext')
+controller.route('/domains/:domain/translations.:ext')
 
 .get(function(req, res) {
 
