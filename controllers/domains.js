@@ -1,7 +1,9 @@
 var app = require("../config/config");
 var controller = app.express.Router();
+
 var Domain = app.model.domains;
 var User = app.model.users;
+var Translation = app.model.translations;
 
 
 controller.route('/domains.:ext')
@@ -38,6 +40,31 @@ controller.route('/domains/:domain.:ext')
                             res.json({ code: 200, message: 'success', datas: datas});
 
                         });
+                    });  
+                }else{
+                    res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
+                }
+            });
+    }else{
+        res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
+    }
+    
+});
+
+controller.route('/domains/:domain/translation.:ext')
+
+.get(function(req, res) {
+
+    var ext = req.params.ext;
+    var domain = req.params.domain;
+
+    if (ext == "json") {
+            Domain.getDomain(domain, function(d){
+                if (d) {
+                    Translation.getTranslationsToLangByDomain(d.id, function(t){
+
+                            res.json({ code: 200, message: 'success', datas: t});
+
                     });  
                 }else{
                     res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
