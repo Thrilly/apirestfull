@@ -12,7 +12,7 @@ Translation.getTranslationsByDomain = function(domain_id, callback){
         if (result.length != 0) {
             return callback(result);
         }else{
-            return callback(false);
+            return callback([]);
         }
     });
 };
