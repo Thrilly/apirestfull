@@ -61,11 +61,20 @@ controller.route('/domains/:domain/translation.:ext')
     if (ext == "json") {
             Domain.getDomain(domain, function(d){
                 if (d) {
-                    Translation.getTranslationsToLangByDomain(d.id, function(t){
+                    Translation.getTranslationsByDomain(d.id, function(t){
+
+                        Translation.getTranslationsToLangByDomain(d.id, function(tl){
+                            for (var i = 0; i < t.length; i++) {
+                                t[i].trans = tl[t[i].id];
+                                t[i].trans.PL = t[i].code;
+                            }
 
                             res.json({ code: 200, message: 'success', datas: t});
 
+                        });
+
                     });  
+                      
                 }else{
                     res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
                 }
