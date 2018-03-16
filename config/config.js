@@ -4,6 +4,7 @@ var params              = require('./parameters');
 exports.fs 				= require('fs')
 exports.morgan 			= require('morgan')
 exports.path 			= require('path')
+exports.bodyParser 		= require('body-parser')
 
 exports.express         = require('express');
 exports.con             = mysql.createConnection(params.db);
