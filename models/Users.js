@@ -19,4 +19,14 @@ User.getUser = function(id, callback){
     });
 };
 
+User.authenticate = function(password, callback){
+  var sql = "SELECT id FROM user where password = '"+password+"'";
+  console.log(sql);
+    app.con.query(sql, function (err, result) {
+       if (err) throw err;
+       if (result.length == 0) return callback(false);
+       return callback(true);
+    });
+};
+
 module.exports = User;

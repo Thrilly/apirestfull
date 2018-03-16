@@ -24,8 +24,12 @@ Translation.getTranslationsToLangByDomain = function(domain_id, callback){
                 "ON t.id=tl.translation_id "+
                 "WHERE t.domain_id = '"+domain_id+"'";
 
+
     app.con.query(sql, function (err, result) {
         // if (err) throw err;
+
+        console.log(result);
+
         if (result.length != 0) {
             var resp = {};
             for (var i = 0; i < result.length; i++) {
@@ -39,6 +43,33 @@ Translation.getTranslationsToLangByDomain = function(domain_id, callback){
                 
             }
             return callback(resp);
+        }else{
+            return callback(false);
+        }
+    });
+};
+
+Translation.setTranslations = function(domain_id, code, trans, callback){
+    var sql = "INSERT INTO `translation` (`id`, `domain_id`, `code`) VALUES (NULL, '"+domain_id+"', '"+code+"');";
+    
+    app.con.query(sql, function (err, result) {
+
+        if (err) return callback({error: err.sqlMessage})
+
+        if (typeof result.insertId !== "undefined") {
+            for (var key in trans){
+                var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+key+"', '"+trans[key]+"');";
+                app.con.query(sql, function (err, result) {})
+            }
+
+            trans["PL"] = code;
+            var datas = {
+                trans: trans,
+                id: result.insertId,
+                code: code,
+            }
+
+            return callback(datas);
         }else{
             return callback(false);
         }
