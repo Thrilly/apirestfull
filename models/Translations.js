@@ -59,7 +59,9 @@ Translation.setTranslations = function(domain_id, code, trans, callback){
         if (typeof result.insertId !== "undefined") {
             for (var key in trans){
                 var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+key+"', '"+trans[key]+"');";
-                app.con.query(sql, function (err, result) {})
+                app.con.query(sql2, function (err, result) {
+                    if (err) return callback({error: err.sqlMessage})
+                })
             }
 
             trans["PL"] = code;
