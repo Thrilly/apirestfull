@@ -129,10 +129,12 @@ controller.route('/domains/:domain/translations.:ext')
                 if (!error) {
                     if (typeof req.body.trans == "object") {
                         for (var k in req.body.trans){
-                                console.log(k);
                             var regex = RegExp('[A-Z]{2}');
                             if (regex.test(k) == false) {
-                                errorMsg += '\'trans\' need iso code array keys like FR, EN, GB';
+                                if (!error) {
+                                    errorMsg += '\'trans\' need iso code array keys (like FR, EN, GB...),';
+                                    error = true;
+                                }
                             }
                             if (req.body.trans[k].length <= 0) {
                                 errorMsg += '\''+requiredFields[i]+'\' cannot be empty, ';
