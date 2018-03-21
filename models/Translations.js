@@ -28,8 +28,6 @@ Translation.getTranslationsToLangByDomain = function(domain_id, callback){
     app.con.query(sql, function (err, result) {
         // if (err) throw err;
 
-        console.log(result);
-
         if (result.length != 0) {
             var resp = {};
             for (var i = 0; i < result.length; i++) {

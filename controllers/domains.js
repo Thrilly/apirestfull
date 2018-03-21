@@ -74,7 +74,6 @@ controller.route('/domains/:domain/translations.:ext')
                 if (d) {
                     Translation.getTranslationsByDomain(d.id, function(t){
                         Translation.getTranslationsToLangByDomain(d.id, function(tl){
-                            console.log(tl);
                             for (var i = 0; i < t.length; i++) {
                                 if (typeof tl[t[i].id] !== 'undefined') {
                                     t[i].trans = tl[t[i].id];
@@ -119,8 +118,6 @@ controller.route('/domains/:domain/translations.:ext')
                 var domain = req.params.domain;
                 
                 var error = false;
-                
-
 
                 for (var i = 0; i < requiredFields.length; i++) {
                     if(typeof req.body[requiredFields[i]] === 'undefined'){
@@ -128,6 +125,30 @@ controller.route('/domains/:domain/translations.:ext')
                         error = true;
                     }
                 }
+
+                if (!error) {
+                    if (typeof req.body.trans == "object") {
+                        for (var k in req.body.trans){
+                            var regex = RegExp('[A-Z]{2}');
+                            if (regex.test(k) == false) {
+                                if (!error) {
+                                    errorMsg += '\'trans\' need iso code array keys (like FR, EN, GB...),';
+                                    error = true;
+                                }
+                            }
+                            if (req.body.trans[k].length <= 0) {
+                                errorMsg += '\''+requiredFields[i]+'\' cannot be empty, ';
+                                error = true;
+                            }
+                        } 
+                    }else{
+                        errorMsg += '\'trans\' need to be an array, ';
+                        error = true;
+                    }
+                    
+                }
+                
+
                 if (!error) {
                     if (ext == "json") {
                         Domain.getDomain(domain, function(d){
@@ -146,13 +167,15 @@ controller.route('/domains/:domain/translations.:ext')
                                 res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
                             }
                         });
+
                     }else{
                         res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
                     }
                     
                 }else{
                    res.status(400).json({ code: 400, message: errorMsg}); 
-                }
+                }  
+            
             }else{
                 res.status(401).json({ code: 401, message: "Not authorized to access to this ressource"}); 
             }
