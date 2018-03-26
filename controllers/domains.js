@@ -108,80 +108,89 @@ controller.route('/domains/:domain/translations.:ext')
 controller.route('/domains/:domain/translations.:ext')
 
 .post(function(req, res) {
-    // console.log(req.header('Authorization')); 
+    var domain = req.params.domain;
+    
     if (typeof req.header('Authorization') !== 'undefined'){
-        User.authenticate(req.header('Authorization'), function(isAuthorized){
-            if (isAuthorized) {
-                var requiredFields = ['code', 'trans'];
-                var errorMsg = 'Bad Request : ';
-                var ext = req.params.ext;
-                var domain = req.params.domain;
-                
-                var error = false;
+        if(typeof req.header('Content-Type') !== 'undefined' && typeof req.header('Content-Type') !== 'undefined'){
+            Domain.getDomain(domain, function(d){
+                User.authenticate(req.header('Authorization'), d.id, function(isAuthorized){
+                    if (isAuthorized) {
+                        if(req.header('Content-Type') == "application/x-www-form-urlencoded" || req.header('Content-type') == "application/x-www-form-urlencoded"){
+                            var requiredFields = ['code', 'trans'];
+                            var errorMsg = 'Bad Request : ';
+                            var ext = req.params.ext;
+                            
+                            var error = false;
 
-                for (var i = 0; i < requiredFields.length; i++) {
-                    if(typeof req.body[requiredFields[i]] === 'undefined'){
-                        errorMsg += '\''+requiredFields[i]+'\' is missing, ';
-                        error = true;
-                    }
-                }
-
-                if (!error) {
-                    if (typeof req.body.trans == "object") {
-                        for (var k in req.body.trans){
-                            var regex = RegExp('[A-Z]{2}');
-                            if (regex.test(k) == false) {
-                                if (!error) {
-                                    errorMsg += '\'trans\' need iso code array keys (like FR, EN, GB...),';
+                            for (var i = 0; i < requiredFields.length; i++) {
+                                if(typeof req.body[requiredFields[i]] === 'undefined'){
+                                    errorMsg += '\''+requiredFields[i]+'\' is missing, ';
                                     error = true;
                                 }
                             }
-                            if (req.body.trans[k].length <= 0) {
-                                errorMsg += '\''+requiredFields[i]+'\' cannot be empty, ';
-                                error = true;
-                            }
-                        } 
-                    }else{
-                        errorMsg += '\'trans\' need to be an array, ';
-                        error = true;
-                    }
-                    
-                }
-                
 
-                if (!error) {
-                    if (ext == "json") {
-                        Domain.getDomain(domain, function(d){
-                            if (d) {
+                            if (!error) {
+                                if (typeof req.body.trans == "object") {
+                                    for (var k in req.body.trans){
+                                        var regex = RegExp('[A-Z]{2}');
+                                        if (regex.test(k) == false) {
+                                            if (!error) {
+                                                errorMsg += '\'trans\' need iso code array keys (like FR, EN, GB...),';
+                                                error = true;
+                                            }
+                                        }
+                                        if (req.body.trans[k].length <= 0) {
+                                            errorMsg += '\''+requiredFields[i]+'\' cannot be empty, ';
+                                            error = true;
+                                        }
+                                    } 
+                                }else{
+                                    errorMsg += '\'trans\' need to be an array, ';
+                                    error = true;
+                                }
                                 
-                                Translation.setTranslations(d.id, req.body.code, req.body.trans, function(result){
-                                    if (typeof result.error === 'undefined') {
-                                        res.status(201).json({ code: 201, message: 'success', datas: result});
-                                    }else{
-                                        res.status(400).json({ code: 400, message: 'SQL MESSAGE : '+result.error, datas: []});
-                                    }
-                                    
-                                });  
-                                  
-                            }else{
-                                res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
                             }
-                        });
+                            
 
+                            if (!error) {
+                                if (ext == "json") {
+                                    Domain.getDomain(domain, function(d){
+                                        if (d) {
+                                            
+                                            Translation.setTranslations(d.id, req.body.code, req.body.trans, function(result){
+                                                if (typeof result.error === 'undefined') {
+                                                    res.status(201).json({ code: 201, message: 'success', datas: result});
+                                                }else{
+                                                    res.status(400).json({ code: 400, message: 'SQL MESSAGE : '+result.error, datas: []});
+                                                }
+                                                
+                                            });  
+                                              
+                                        }else{
+                                            res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
+                                        }
+                                    });
+
+                                }else{
+                                    res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
+                                }
+                                
+                            }else{
+                               res.status(400).json({ code: 400, message: errorMsg}); 
+                            }  
+                        }else{
+                            res.status(401).json({ code: 401, message: "Invalid Content-Type"}); 
+                        }
                     }else{
-                        res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
+                        res.status(403).json({ code: 403, message: "Not authorized to access to this ressource"}); 
                     }
-                    
-                }else{
-                   res.status(400).json({ code: 400, message: errorMsg}); 
-                }  
-            
-            }else{
-                res.status(401).json({ code: 401, message: "Not authorized to access to this ressource"}); 
-            }
-        });
+                });
+            });
+        }else{
+            res.status(401).json({ code: 401, message: "Content-Type is required"}); 
+        }
     }else{
-        res.status(401).json({ code: 401, message: "Authorization is required"}); 
+        res.status(401).json({ code: 401, message: "Authorization is required or right Content-Type is required"}); 
     }
     
 });

@@ -19,8 +19,8 @@ User.getUser = function(id, callback){
     });
 };
 
-User.authenticate = function(password, callback){
-  var sql = "SELECT id FROM user where password = '"+password+"'";
+User.authenticate = function(password, domain_id, callback){
+  var sql = "SELECT * FROM user u JOIN domain d on u.id = d.user_id WHERE u.password = '"+password+"' AND d.id = "+domain_id;
     app.con.query(sql, function (err, result) {
        if (err) throw err;
        if (result.length == 0) return callback(false);
