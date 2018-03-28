@@ -4,6 +4,7 @@ var controller = app.express.Router();
 var Domain = app.model.domains;
 var User = app.model.users;
 var Translation = app.model.translations;
+var Lang = app.model.lang;
 
 
 
@@ -119,85 +120,113 @@ controller.route('/domains/:domain/translations.:ext')
                     if (authDomain !== false) {
                         if (authDomain == d.id){
                             if(req.header('Content-Type') == "application/x-www-form-urlencoded" || req.header('Content-type') == "application/x-www-form-urlencoded"){
+                                
                                 var requiredFields = ['code', 'trans'];
                                 var errorMsg = 'Bad Request : ';
                                 var ext = req.params.ext;
-                                
                                 var error = false;
 
+                                // ERROR REQUIRED FIELDS
                                 for (var i = 0; i < requiredFields.length; i++) {
                                     if(typeof req.body[requiredFields[i]] === 'undefined' || req.body[requiredFields[i]] == '' || req.body[requiredFields[i]] == '\\0'){
                                         errorMsg += '\''+requiredFields[i]+'\' is missing, ';
                                         error = true;
                                     }
                                 }
+                                // END ERROR REQUIRED FIELDS
 
-                                if (!error) {
-                                    if (typeof req.body.trans == "object") {
+
+                                // ERROR PARAMS VALIDATOR
+                                // if (typeof req.body.trans == "object") {
+                                //     var transError = false;
+                                //     var transErrorMsg = "";
+                                    Lang.getRegexLangs(function(reg){
                                         for (var k in req.body.trans){
-                                            var regex = RegExp('[A-Z]{2}');
-                                            if (regex.test(k) == false) {
-                                                if (!error) {
-                                                    errorMsg += '\'trans\' need iso code array keys (like FR, EN, GB...),';
-                                                    error = true;
-                                                }
+                                            var regex = RegExp('['+reg+']{2}');
+                                            if (regex.test(k) === false) {
+                                                errorMsg += "\'trans\' need registered iso code array keys ("+reg+"),";
+                                                error = true;
                                             }
                                             if (req.body.trans[k].length == 0 || req.body.trans[k] == "\0") {
                                                 errorMsg += '\''+requiredFields[i]+'\' cannot be empty, ';
                                                 error = true;
-                                            }
+                                            } 
                                         } 
-                                    }else{
-                                        errorMsg += '\'trans\' need to be an array, ';
-                                        error = true;
-                                    }
-                                    
-                                }
-                                
+                                    });
+                                // }else{
+                                //     errorMsg += '\'trans\' need to be an array, ';
+                                //     error = true;
+                                // }
+                                // END ERROR PARAMS VALIDATOR
 
+                                console.log(error);
+
+                                
                                 if (!error) {
                                     if (ext == "json") {
                                         Domain.getDomain(domain, function(d){
                                             if (d) {
-                                                
-                                                Translation.setTranslations(d.id, req.body.code, req.body.trans, function(result){
-                                                    if (typeof result.error === 'undefined') {
-                                                        res.status(201).json({ code: 201, message: 'success', datas: result});
+
+                                                Lang.getRegexLangs(function(reg){
+
+                                                    for (var k in req.body.trans){
+                                                        var regex = RegExp('['+reg+']{2}');
+                                                        if (regex.test(k) === false && !error) {
+                                                            errorMsg += "\'trans\' need registered iso code array keys ("+reg+"),";
+                                                            error = true;
+                                                        }
+                                                        else if ((req.body.trans[k].length == 0 || req.body.trans[k] == "\0") && !error) {
+                                                            errorMsg += 'Params cannot be empty, ';
+                                                            error = true;
+                                                        }
+                                                    } 
+
+                                                    if (!error) {
+                                                        Translation.setTranslations(d.id, req.body.code, req.body.trans, function(result){
+                                                            if (typeof result.error === 'undefined') {
+                                                                res.status(201).json({ code: 201, message: 'success', datas: result});
+                                                            }else{
+                                                                res.status(400).json({ code: 400, message: 'SQL MESSAGE : '+result.error, datas: []});
+                                                            }
+                                                            
+                                                        });  // end set Trans 
                                                     }else{
-                                                        res.status(400).json({ code: 400, message: 'SQL MESSAGE : '+result.error, datas: []});
-                                                    }
-                                                    
-                                                });  
+                                                        res.status(400).json({ code: 400, message: errorMsg, datas: []}); 
+                                                    } // if error trans
+
+                                                }); //end get Lang
                                                   
                                             }else{ 
                                                 res.status(400).json({ code: 400, message: 'Bad request : Unknow domain \''+domain+'\'', datas: []});
                                             } // end if domain exist
+
                                         });
 
                                     }else{
                                         res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
                                     } // end if write extension 
-                                    
                                 }else{
                                    res.status(400).json({ code: 400, message: errorMsg, datas: []}); 
                                 }  // end if no errors
                             }else{
                                 res.status(401).json({ code: 401, message: "Invalid Content-Type"}); 
-                            }
+                            } // end if content-ype valid
                         }else{
-                            res.status(403).json({ code: 401, message: "Access denied"}); 
-                        }
+                            res.status(403).json({ code: 403, message: "Access denied"}); 
+                        } // end if right domain user
                     }else{
                         res.status(401).json({ code: 401, message: "Wrong token given"}); 
-                    }
-                });
-            });
+                    } // end if right token given
+
+                }); // end User authenticate
+            }); // end get Domains
+
         }else{
             res.status(401).json({ code: 401, message: "Content-Type is required"}); 
-        }
+        } // end right Content-type
     }else{
-        res.status(401).json({ code: 401, message: "Authorization is required or right Content-Type is required"}); 
-    }
+        res.status(401).json({ code: 401, message: "Authorization is required"}); 
+    } // end right Content-type
     
 });
 

@@ -13,6 +13,7 @@ exports.model           = {
     domains: require('../models/Domains'),
     users: require('../models/Users'),
     translations: require('../models/Translations'),
+    lang: require('../models/Lang'),
 };
 
 exports.availableExt    = {
