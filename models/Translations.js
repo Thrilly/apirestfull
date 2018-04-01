@@ -47,7 +47,7 @@ Translation.getTranslationsToLangByDomain = function(domain_id, callback){
     });
 };
 
-Translation.setTranslations = function(domain_id, code, trans, callback){
+Translation.setTranslations = function(domain_id, domain_lang, code, trans, callback){
     var sql = "INSERT INTO `translation` (`id`, `domain_id`, `code`) VALUES (NULL, '"+domain_id+"', '"+code+"');";
     
     app.con.query(sql, function (err, result) {
@@ -55,12 +55,31 @@ Translation.setTranslations = function(domain_id, code, trans, callback){
         if (err) return callback({error: err.sqlMessage})
 
         if (typeof result.insertId !== "undefined") {
-            for (var key in trans){
-                var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+key+"', '"+trans[key]+"');";
-                app.con.query(sql2, function (err, result) {
-                    if (err) return callback({error: err.sqlMessage})
-                })
+            for (var key in domain_lang){
+                // console.log(domain_lang[key])
+                var lang_key = domain_lang[key];
+                if (lang_key != "PL") {
+                    if (typeof trans[lang_key] !== "undefined") {
+                        var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+lang_key+"', '"+trans[lang_key]+"');";
+                        app.con.query(sql2, function (err, result) {
+                            if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
+                        })
+                    }else{
+                        var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+lang_key+"', '');";
+                        app.con.query(sql2, function (err, result) {
+                            if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
+                        })
+                        trans[lang_key] = "";
+                    } 
+                }
+                
             }
+            // for (var key in trans){
+            //     var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+key+"', '"+trans[key]+"');";
+            //     app.con.query(sql2, function (err, result) {
+            //         if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
+            //     })
+            // }
 
             trans["PL"] = code;
             var datas = {
