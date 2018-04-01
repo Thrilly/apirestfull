@@ -155,6 +155,8 @@ controller.route('/domains/:domain/translations.:ext')
             });
         },
 
+        
+
         function(d, callback){
             User.authenticate(req.header('Authorization'), d.id, function(authDomain){
                 if (authDomain === false) {
@@ -180,14 +182,17 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
         function(d, callback){
-            Lang.getRegexLangs(function(reg){
+            Lang.getRegexDomainLangs(d.id, function(reg){
                 if (typeof req.body.trans != "object") {
                     callback(400, '\'trans\' need to be an array');
                 }else{
                     for (var k in req.body.trans){
                         var regex = RegExp('['+reg+']{2}');
                         if (regex.test(k) === false) {
-                            callback(400, "\'trans\' need registered iso code array keys");
+                            if (reg == '') {
+                                callback(400, "No lang is registered in this domain");
+                            }
+                            callback(400, "\'trans\' need registered iso code array keys ("+reg+")");
                         }
                         if (req.body.trans[k].length == 0 || req.body.trans[k] == "\0") {
                             callback(400, '\'trans\' values cannot be empty');
@@ -199,7 +204,13 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
         function(d, callback){
-            Translation.setTranslations(d.id, req.body.code, req.body.trans, function(result){
+            Lang.getDomainLangs(d.id, function(dl){
+                callback(null, d, dl);
+            });
+        },
+
+        function(d, dl, callback){
+            Translation.setTranslations(d.id, dl, req.body.code, req.body.trans, function(result){
                 if (typeof result.error === 'undefined') {
                     res.status(201).json({ code: 201, message: 'success', datas: result});
                 }else{

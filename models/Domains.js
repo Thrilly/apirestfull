@@ -24,7 +24,6 @@ Domain.getDomain = function(dname, callback){
 
 Domain.getDomainLangs = function(did, callback){
     var sql = "SELECT lang_id FROM domain_lang where domain_id = "+did+"";
-    console.log(sql);
     app.con.query(sql, function (err, result) {
         var resp = [];
         for (var i = 0; i < result.length; i++) {
