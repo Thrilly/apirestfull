@@ -347,7 +347,7 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
         function(d, dl, callback){
             Translation.setTranslation(d.id, dl, idtrans, req.body.trans, function(result){
                 if (typeof result.error === 'undefined') {
-                    res.status(201).json({ code: 201, message: 'success', datas: result});
+                    res.status(200).json({ code: 200, message: 'success', datas: result});
                 }else{
                     callback(400, result.error);
                 }
