@@ -161,7 +161,7 @@ Translation.setTranslation = function(domain_id, domain_lang, id, trans, callbac
 
                     var datas = {
                         trans: dbtrans,
-                        id: id,
+                        id: parseInt(id),
                         code: tld.code,
                     }
 
@@ -170,6 +170,28 @@ Translation.setTranslation = function(domain_id, domain_lang, id, trans, callbac
             }
         });
     });
+};
+
+Translation.deleteTranslations = function(id, callback){
+    
+    sql = "DELETE FROM translation_to_lang WHERE translation_id = '"+id+"';";
+
+    app.con.query(sql, function (err, result) {
+
+        sql2 = "DELETE FROM translation WHERE id = '"+id+"';";
+
+        if (err) return callback({error: err.sqlMessage});
+
+        app.con.query(sql2, function (err, result) {
+            if (err) return callback({error: err.sqlMessage});
+        });
+        var datas = {
+            id: parseInt(id),
+        }
+
+        return callback(datas);
+    });
+
 };
 
 module.exports = Translation;

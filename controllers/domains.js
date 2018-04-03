@@ -360,4 +360,87 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
     
 });
 
+// ####################### ROUTE 6 #######################
+
+controller.route('/domains/:domain/translations/:idtrans.:ext')
+
+.delete(function(req, res) {
+    var domain = req.params.domain;
+    var ext = req.params.ext;
+    var idtrans = req.params.idtrans;
+
+    async.waterfall([
+
+        function(callback) {
+            if (typeof req.header('Authorization') === 'undefined'){
+                callback(401, "Authorization is required");
+                return;
+            } else if (typeof req.header('Content-Type') === 'undefined' && typeof req.header('Content-Type') === 'undefined') {
+                callback(401, "Content-Type is required");
+                return;
+            } else {
+                callback(null);
+            }
+        },
+
+        function(callback){
+            Domain.getDomain(domain, function(d){
+                if (ext != "json") {
+                    callback(400, 'Bad request : Extension \''+ext+'\' not available');
+                    return;
+                }else if (!d){
+                    callback(404, 'Not Found : Unknow domain \''+domain+'\''); 
+                    return;
+                }else{
+                    callback(null, d); 
+                }
+            });
+        },
+
+        
+
+        function(d, callback){
+            User.authenticate(req.header('Authorization'), d.id, function(authDomain){
+                if (authDomain === false) {
+                    callback(401, "Wrong token given");
+                    return;
+                }else if(authDomain != d.id){
+                    callback(403, "Access Denied");
+                    return;
+                }else if(req.header('Content-Type') != "application/x-www-form-urlencoded" || req.header('Content-type') != "application/x-www-form-urlencoded"){
+                    callback(401, "Invalid Content-Type");
+                    return;
+                }else{
+                    callback(null);
+                }
+            });
+        },
+
+        function(callback){
+            Translation.getTranslationsById(idtrans, function(tl){
+                if(tl.length == 0){
+                    callback(400, "No translation with id "+idtrans);
+                }
+                callback(null);
+            });
+        },
+
+
+
+        function(callback){
+            Translation.deleteTranslations(idtrans, function(result){
+                if (typeof result.error === 'undefined') {
+                    res.status(200).json({ code: 200, message: 'success', datas: result});
+                }else{
+                    callback(400, result.error);
+                }
+            });
+        },
+
+    ],function(err, msg) {
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+    });
+    
+});
+
 module.exports = controller;
