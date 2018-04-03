@@ -161,7 +161,7 @@ Translation.setTranslation = function(domain_id, domain_lang, id, trans, callbac
 
                     var datas = {
                         trans: dbtrans,
-                        id: id,
+                        id: parseInt(id),
                         code: tld.code,
                     }
 
@@ -186,7 +186,7 @@ Translation.deleteTranslations = function(id, callback){
             if (err) return callback({error: err.sqlMessage});
         });
         var datas = {
-            id: id,
+            id: parseInt(id),
         }
 
         return callback(datas);
