@@ -64,7 +64,7 @@ controller.route('/domains/:domain.:ext')
         }
 
     ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, data:[]})} else {res.status(err).json({ code: err, message: msg})}
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
     });
 
 });
@@ -123,7 +123,7 @@ controller.route('/domains/:domain/translations.:ext')
         }
 
     ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, data:[]})} else {res.status(err).json({ code: err, message: msg})}
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
     });
     
 });
@@ -238,7 +238,7 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
     ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, data:[]})} else {res.status(err).json({ code: err, message: msg})}
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
     });
     
 });
@@ -355,7 +355,7 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
         },
 
     ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, data:[]})} else {res.status(err).json({ code: err, message: msg})}
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
     });
     
 });
