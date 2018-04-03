@@ -71,7 +71,7 @@ controller.route('/domains/:domain.:ext')
 
 
 
-// ####################### ROUTE 3 #######################
+// ####################### ROUTE 3 AND 7 #######################
 
 controller.route('/domains/:domain/translations.:ext')
 
@@ -79,6 +79,7 @@ controller.route('/domains/:domain/translations.:ext')
 
     var ext = req.params.ext;
     var domain = req.params.domain;
+    var code = req.query.code;
 
     async.waterfall([
 
@@ -88,6 +89,8 @@ controller.route('/domains/:domain/translations.:ext')
                     callback(400, 'Bad request : Extension \''+ext+'\' not available');
                 }else if (!d){
                     callback(404, 'Not Found : Unknow domain \''+domain+'\''); 
+                }else if (typeof req.params.code !== 'undefined' && (req.params.code == '' || req.params.code == '\0' || req.params.code == '\\0' || req.params.code == null)){
+                    callback(400, 'Bad Request : code parameter cannot be empty'); 
                 }else{
                     callback(null, d); 
                 }
@@ -95,9 +98,20 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
         function(d, callback){
-            Translation.getTranslationsByDomain(d.id, function(t){
-                callback(null, d, t)
-            });
+            if (typeof req.query.code === 'undefined'){
+
+                // ROUTE 3
+                Translation.getTranslationsByDomain(d.id, function(t){
+                    callback(null, d, t)
+                });
+
+            }else{
+
+                // ROUTE 7
+                Translation.getTranslationsByDomainFilter(d.id, code, function(t){
+                    callback(null, d, t)
+                });
+            }
         },
 
         function(d, t, callback){
@@ -107,20 +121,43 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
         function(d, t, dl, callback){
-            Translation.getTranslationsToLangByDomain(d.id, function(tl){
-                for (var i = 0; i < t.length; i++) {
-                    if (typeof tl[t[i].id] !== 'undefined') {
-                        t[i].trans = tl[t[i].id];
-                        for (var key in dl){
-                            var idlang = dl[key];
-                            if (typeof t[i].trans[idlang] === 'undefined') t[i].trans[idlang] = t[i].code;
-                        }
-                    }
+            
+            if (typeof req.query.code === 'undefined'){
 
-                }
-                res.json({ code: 200, message: 'success', datas: t});
-            });
-        }
+                // ROUTE 3
+                Translation.getTranslationsToLangByDomain(d.id, function(tl){
+                    for (var i = 0; i < t.length; i++) {
+                        if (typeof tl[t[i].id] !== 'undefined') {
+                            t[i].trans = tl[t[i].id];
+                            for (var key in dl){
+                                var idlang = dl[key];
+                                if (typeof t[i].trans[idlang] === 'undefined') t[i].trans[idlang] = t[i].code;
+                            }
+                        }
+
+                    }
+                    res.json({ code: 200, message: 'success', datas: t});
+                });
+
+            }else{
+
+                // ROUTE 7
+                Translation.getTranslationsToLangByDomainFilter(d.id, code, function(tl){
+                    for (var i = 0; i < t.length; i++) {
+                        if (typeof tl[t[i].id] !== 'undefined') {
+                            t[i].trans = tl[t[i].id];
+                            for (var key in dl){
+                                var idlang = dl[key];
+                                if (typeof t[i].trans[idlang] === 'undefined') t[i].trans[idlang] = t[i].code;
+                            }
+                        }
+
+                    }
+                    res.json({ code: 200, message: 'success', datas: t});
+                });
+            }
+
+        },
 
     ],function(err, msg) {
         if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
