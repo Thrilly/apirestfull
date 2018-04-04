@@ -12,7 +12,7 @@ User.getUsers = function(callback){
 };
 
 User.getUser = function(id, callback){
-	var sql = "SELECT id, username FROM user where id = '"+id+"'";
+	var sql = "SELECT id, username, email FROM user where id = '"+id+"'";
     app.con.query(sql, function (err, result) {
        if (err) throw err;
        return callback(result[0]);
