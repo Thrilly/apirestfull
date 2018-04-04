@@ -30,7 +30,7 @@ controller.route('/domains.:ext')
 
 
 
-// ####################### ROUTE 2 #######################
+// ####################### ROUTE 2 AND 8 #######################
 
 controller.route('/domains/:domain.:ext')
 
@@ -54,9 +54,33 @@ controller.route('/domains/:domain.:ext')
         },
 
         function(d, callback){
+            User.authenticate(req.header('Authorization'), d.id, function(authDomain){
+                if (typeof req.header('Authorization') !== 'undefined'){
+                    if (authDomain === false) {
+                        callback(401, "Wrong token given");
+                        return;
+                    }else if(authDomain != d.id){
+                        callback(403, "Access Denied");
+                        return;
+                    }else{
+                        callback(null, d, true);
+                    }
+                }else{
+                    callback(null, d, false);
+                }
+            });
+        },
+
+        function(d, authenticated, callback){
             User.getUser(d.user_id, function(u){
                 Domain.getDomainLangs(d.id, function(dl){
-                    var datas = {langs: dl, id: d.id, slug: d.slug, name: d.name, description: d.description, creator: u, created_at: d.created_at}
+                    
+                    var u_info = u;
+                    if (!authenticated) {
+                        u_info = {id : u.id, username: u.username};
+                    }
+
+                    var datas = {langs: dl, id: d.id, slug: d.slug, name: d.name, description: d.description, creator: u_info, created_at: d.created_at}
                     res.json({ code: 200, message: 'success', datas: datas});
 
                 });
