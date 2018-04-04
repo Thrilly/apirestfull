@@ -498,4 +498,25 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
     
 });
 
+// ####################### ROUTE 9 #######################
+
+// controller.route('/domains.:ext')
+
+// .post(function(req, res) {
+
+//     var ext = req.params.ext;
+
+//     async.waterfall([]);
+
+//     if (ext == "json") {
+//         Domain.getDomains(function(ds){
+//             res.json({ code: 200, message: 'success', datas: ds});
+//         });
+//     }else{
+//         res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
+//     }
+
+    
+// });
+
 module.exports = controller;
