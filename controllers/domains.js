@@ -74,7 +74,7 @@ controller.route('/domains/:domain.:ext')
         function(d, authenticated, callback){
             User.getUser(d.user_id, function(u){
                 Domain.getDomainLangs(d.id, function(dl){
-                    
+
                     var u_info = u;
                     if (!authenticated) {
                         u_info = {id : u.id, username: u.username};
@@ -436,9 +436,6 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
             if (typeof req.header('Authorization') === 'undefined'){
                 callback(401, "Authorization is required");
                 return;
-            } else if (typeof req.header('Content-Type') === 'undefined' && typeof req.header('Content-Type') === 'undefined') {
-                callback(401, "Content-Type is required");
-                return;
             } else {
                 callback(null);
             }
@@ -467,9 +464,6 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
                     return;
                 }else if(authDomain != d.id){
                     callback(403, "Access Denied");
-                    return;
-                }else if(req.header('Content-Type') != "application/x-www-form-urlencoded" || req.header('Content-type') != "application/x-www-form-urlencoded"){
-                    callback(401, "Invalid Content-Type");
                     return;
                 }else{
                     callback(null);
