@@ -55,16 +55,16 @@ controller.route('/domains/:domain.:ext')
 
         function(d, callback){
             User.authenticate(req.header('Authorization'), d.id, function(authDomain){
-                if (typeof req.header('Authorization') !== 'undefined'){
-                    if (authDomain === false) {
-                        callback(401, "Wrong token given");
-                        return;
-                    }else if(authDomain != d.id){
-                        callback(403, "Access Denied");
-                        return;
-                    }else{
+                if (typeof req.header('Authorization') !== 'undefined' && authDomain && authDomain == d.id){
+                    // if (authDomain === false) {
+                    //     callback(401, "Wrong token given");
+                    //     return;
+                    // }else if(authDomain != d.id){
+                    //     callback(null, d, false);
+                    //     return;
+                    // }else{
                         callback(null, d, true);
-                    }
+                    // }
                 }else{
                     callback(null, d, false);
                 }
@@ -497,5 +497,26 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
     });
     
 });
+
+// ####################### ROUTE 9 #######################
+
+// controller.route('/domains.:ext')
+
+// .post(function(req, res) {
+
+//     var ext = req.params.ext;
+
+//     async.waterfall([]);
+
+//     if (ext == "json") {
+//         Domain.getDomains(function(ds){
+//             res.json({ code: 200, message: 'success', datas: ds});
+//         });
+//     }else{
+//         res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
+//     }
+
+    
+// });
 
 module.exports = controller;
