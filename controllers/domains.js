@@ -602,4 +602,95 @@ controller.route('/domains.:ext')
     
 });
 
+
+// ####################### ROUTE 10 #######################
+
+controller.route('/domains/:domain/langs/:idlang.:ext')
+
+.delete(function(req, res) {
+    var domain = req.params.domain;
+    var ext = req.params.ext;
+    var lang = req.params.idlang;
+
+    async.waterfall([
+
+        function(callback) {
+            if (typeof req.header('Authorization') === 'undefined'){
+                callback(401, "Authorization is required");
+                return;
+            } else {
+                callback(null);
+            }
+        },
+
+        function(callback){
+            Domain.getDomain(domain, function(d){
+                if (ext != "json") {
+                    callback(400, 'Bad request : Extension \''+ext+'\' not available');
+                    return;
+                }else if (!d){
+                    callback(404, 'Not Found : Unknow domain \''+domain+'\''); 
+                    return;
+                }else{
+                    callback(null, d); 
+                }
+            });
+        },
+
+        
+
+        function(d, callback){
+            User.authenticate(req.header('Authorization'), d.id, function(authDomain){
+                if (authDomain === false) {
+                    callback(401, "Wrong token given");
+                    return;
+                }else if(authDomain != d.id){
+                    callback(403, "Access Denied");
+                    return;
+                }else{
+                    callback(null, d);
+                }
+            });
+        },
+
+        function(d, callback){
+            Lang.getDomainLangById(d.id, lang, function(l){
+                if(!l){
+                    callback(400, "No lang with id "+lang+" in this domain");
+                }
+                callback(null, d);
+            });
+        },
+
+
+
+        function(d, callback){
+            Lang.deleteLang(lang, function(result){
+                if (typeof result.error === 'undefined') {
+                    callback(null, d)
+                }else{
+                    callback(400, result.error);
+                }
+            });
+        },
+
+        function(d, callback){
+            User.getUser(d.user_id, function(u){
+                Domain.getDomainLangs(d.id, function(dl){
+
+                    var u_info = u;
+
+                    var datas = {langs: dl, id: d.id, slug: d.slug, name: d.name, description: d.description, creator: u_info, created_at: d.created_at}
+                    res.json({ code: 200, message: 'success', datas: datas});
+
+                });
+            }); 
+        }
+
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
+    
+});
+
 module.exports = controller;

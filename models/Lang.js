@@ -55,6 +55,23 @@ Lang.getDomainLangs = function(d_id, callback){
     });
 };
 
+Lang.getDomainLangById = function(d_id, id_lang, callback){
+  var sql = "SELECT lang_id FROM domain_lang WHERE domain_id =" + d_id + " AND lang_id = '"+id_lang+"'";
+    app.con.query(sql, function (err, result) {
+       if (err) throw err;
+       if (result.length > 0) { return callback(result[0]); }
+       return callback(false);      
+    });
+};
+
+Lang.deleteLang = function(id_lang, callback){
+  var sql = "DELETE FROM domain_lang WHERE lang_id = '"+id_lang+"'";
+    app.con.query(sql, function (err, result) {
+       if (err) return callback({error: err.errorMessage});
+       return callback(true);      
+    });
+};
+
 
 
 module.exports = Lang;
