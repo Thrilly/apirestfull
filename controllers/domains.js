@@ -573,6 +573,12 @@ controller.route('/domains.:ext')
                             callback(400, '\'trans\' values cannot be empty');
                             return;
                         } 
+                        for (var l in langs){
+                            if (langs[l] == req.body.trans[k]) {
+                                callback(400, "Cannot duplicate lang "+req.body.trans[k]);
+                                return;
+                            }
+                        }
                         langs.push(req.body.trans[k]);
                     }
                     callback(null, u, langs);
