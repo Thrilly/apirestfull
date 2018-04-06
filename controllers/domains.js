@@ -263,7 +263,7 @@ controller.route('/domains/:domain/translations.:ext')
                     callback(400, '\'trans\' need to be an array');
                 }else{
                     for (var k in req.body.trans){
-                        var regex = RegExp('['+reg+']{2}');
+                        var regex = RegExp('^['+reg+']{2}$');
                         if (regex.test(k) === false) {
                             if (reg == '') {
                                 callback(400, "No lang is registered in this domain");
@@ -558,8 +558,10 @@ controller.route('/domains.:ext')
                 }else{
                     var langs = [];
                     for (var k in req.body.trans){
-                        var regex = RegExp('['+reg+']{2}');
+                        var regex = RegExp('^['+reg+']{2}$');
+                        console.log(regex.test(req.body.trans[k]));
                         if (regex.test(req.body.trans[k]) === false) {
+
                             if (reg == '') {
                                 callback(400, "No lang is registered"); 
                                 return;
@@ -573,14 +575,12 @@ controller.route('/domains.:ext')
                         } 
                         langs.push(req.body.trans[k]);
                     }
-                    console.log(langs);
                     callback(null, u, langs);
                 }
             });
         },
 
         function(u, langs, callback){
-            console.log(u);
             Domain.setDomain(req.body.name, req.body.description, langs, u, function(result){
                 if (typeof result.error === "undefined") {
                     res.status(201).json({ code: 201, message: 'success', datas: result});
