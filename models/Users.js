@@ -28,4 +28,13 @@ User.authenticate = function(password, domain_id, callback){
     });
 };
 
+User.authenticateO = function(password, callback){
+  var sql = "SELECT * FROM user WHERE password = '"+password+"'";
+    app.con.query(sql, function (err, result) {
+       if (err) throw err;
+       if (result.length == 0) return callback(false);
+       return callback(result[0]);
+    });
+};
+
 module.exports = User;

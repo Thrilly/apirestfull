@@ -157,10 +157,6 @@ Translation.setTranslations = function(domain_id, domain_lang, code, trans, call
                         if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
                     })
                 }else{
-                    // var sql2 = "INSERT INTO `translation_to_lang` (`translation_id`, `lang_id`, `trans`) VALUES ('"+result.insertId+"', '"+lang_key+"', '');";
-                    // app.con.query(sql2, function (err, result) {
-                        // if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
-                    // })
                     trans[lang_key] = code;
                 } 
             }

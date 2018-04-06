@@ -87,9 +87,9 @@ controller.route('/domains/:domain.:ext')
             }); 
         }
 
-    ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
-    });
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
 
 });
 
@@ -145,7 +145,7 @@ controller.route('/domains/:domain/translations.:ext')
         },
 
         function(d, t, dl, callback){
-            
+
             if (typeof req.query.code === 'undefined'){
 
                 // ROUTE 3
@@ -183,9 +183,9 @@ controller.route('/domains/:domain/translations.:ext')
 
         },
 
-    ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
-    });
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
     
 });
 
@@ -298,10 +298,10 @@ controller.route('/domains/:domain/translations.:ext')
             });
         },
 
-    ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
-    });
-    
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
+
 });
 
 
@@ -415,10 +415,10 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
             });
         },
 
-    ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
-    });
-    
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
+
 });
 
 // ####################### ROUTE 6 #######################
@@ -492,31 +492,108 @@ controller.route('/domains/:domain/translations/:idtrans.:ext')
             });
         },
 
-    ],function(err, msg) {
-        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
-    });
+        ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
     
 });
 
 // ####################### ROUTE 9 #######################
 
-// controller.route('/domains.:ext')
+controller.route('/domains.:ext')
 
-// .post(function(req, res) {
+.post(function(req, res) {
 
-//     var ext = req.params.ext;
+    var ext = req.params.ext;
 
-//     async.waterfall([]);
+    async.waterfall([
 
-//     if (ext == "json") {
-//         Domain.getDomains(function(ds){
-//             res.json({ code: 200, message: 'success', datas: ds});
-//         });
-//     }else{
-//         res.status(400).json({ code: 400, message: 'Bad request : Extension \''+ext+'\' not available', datas: []});
-//     }
+        function(callback){
+            if (typeof req.header('Authorization') === 'undefined'){
+                callback(401, "Authorization is required");
+                return;
+            } else if (typeof req.header('Content-Type') === 'undefined' && typeof req.header('Content-Type') === 'undefined') {
+                callback(401, "Content-Type is required");
+                return;
+            } else if (ext != "json") {
+                callback(400, 'Bad request : Extension \''+ext+'\' not available');
+                return;
+            }else{
+                callback(null); 
+            }
+        },
+
+
+
+        function(callback){
+            User.authenticateO(req.header('Authorization'), function(u){
+                if (u === false) {
+                    callback(401, "Wrong token given");
+                    return;
+                }else if(req.header('Content-Type') != "application/x-www-form-urlencoded" || req.header('Content-type') != "application/x-www-form-urlencoded"){
+                    callback(401, "Invalid Content-Type");
+                    return;
+                }else{
+                    callback(null, u);
+                }
+            });
+        },
+
+        function(u, callback){
+            var requiredFields = ['trans', 'name', 'description'];
+            for (var i = 0; i < requiredFields.length; i++) {
+                if(typeof req.body[requiredFields[i]] === 'undefined' || req.body[requiredFields[i]] == '' || req.body[requiredFields[i]] == '\\0'){
+                    callback(400, '\''+requiredFields[i]+'\' parameter is missing');
+                    return;
+                }
+            }
+            callback(null, u);
+        },
+
+        function(u, callback){
+            Lang.getRegexLangs(function(reg){
+                if (typeof req.body.trans != "object") {
+                    callback(400, '\'trans\' need to be an array');
+                    return;
+                }else{
+                    var langs = [];
+                    for (var k in req.body.trans){
+                        var regex = RegExp('['+reg+']{2}');
+                        if (regex.test(req.body.trans[k]) === false) {
+                            if (reg == '') {
+                                callback(400, "No lang is registered"); 
+                                return;
+                            }
+                            callback(400, "Unknow lang "+req.body.trans[k]+", \'trans\' need registered iso code values ("+reg+")");
+                            return;
+                        }
+                        if (req.body.trans[k].length == 0 || req.body.trans[k] == "\0") {
+                            callback(400, '\'trans\' values cannot be empty');
+                            return;
+                        } 
+                        langs.push(req.body.trans[k]);
+                    }
+                    console.log(langs);
+                    callback(null, u, langs);
+                }
+            });
+        },
+
+        function(u, langs, callback){
+            console.log(u);
+            Domain.setDomain(req.body.name, req.body.description, langs, u, function(result){
+                if (typeof result.error === "undefined") {
+                    res.status(201).json({ code: 201, message: 'success', datas: result});
+                }else{
+                    callback(400, result.error);
+                }
+            });
+        },
+    ],function(err, msg) {
+            if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+        });
 
     
-// });
+});
 
 module.exports = controller;
