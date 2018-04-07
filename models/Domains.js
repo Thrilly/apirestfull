@@ -29,8 +29,9 @@ Domain.setDomain = function(dname, desc, langs, user, callback){
     var datetime = app.datetime;
     var dt = datetime.create();
     datenow = dt.format('Y-m-d H:M:S');
+    slug = dname+"_"+dt.now();
 
-    var sql = "INSERT INTO domain VALUES (NULL, "+user.id+", '"+dname+"', '"+desc+"', '"+dname+"', '"+datenow+"');";
+    var sql = "INSERT INTO domain VALUES (NULL, "+user.id+", '"+dname+"', '"+desc+"', '"+slug+"', '"+datenow+"');";
 
     app.con.query(sql, function (err, result) {
 
@@ -48,8 +49,9 @@ Domain.setDomain = function(dname, desc, langs, user, callback){
             var datas = {
                 langs : langs,
                 id : result.insertId,
-                slug : dname,
+                slug : slug,
                 name : dname,
+                description : desc,
                 creator : {
                     id: user.id,
                     username: user.username,
