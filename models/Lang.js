@@ -10,6 +10,20 @@ Lang.getLangs = function(callback){
     });
 };
 
+Lang.getLangsLimit = function(page, limit, order, callback){
+  var start = (page-1)*limit;
+  var sql = "SELECT code FROM lang ORDER BY code "+order+" LIMIT "+start+","+limit;
+    app.con.query(sql, function (err, result) {
+       if (err) throw err;
+       var langs = [];
+       for (var i = 0; i < result.length; i++) {
+          langs.push(result[i].code);
+       }
+       if (langs.length > 0) { return callback(langs); }
+       return callback([]);      
+    });
+};
+
 Lang.getRegexLangs = function(callback){
 	var sql = "SELECT code FROM lang";
     app.con.query(sql, function (err, result) {

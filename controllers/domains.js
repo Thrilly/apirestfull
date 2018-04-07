@@ -696,4 +696,57 @@ controller.route('/domains/:domain/langs/:idlang.:ext')
     
 });
 
+// ####################### ROUTE 11 #######################
+
+controller.route('/langs.:ext')
+
+.get(function(req, res) {
+
+    var ext = req.params.ext;
+    var page = req.query.page;
+    var per_page = req.query.per_page;
+    var sort = req.query.sort;
+
+    async.waterfall([
+
+        function(callback){
+            if (ext != "json") {
+                callback(400, 'Bad request : Extension \''+ext+'\' not available');
+                return;
+            }
+            var requiredFields = ['page', 'per_page'];
+            for (var i = 0; i < requiredFields.length; i++) {
+                if(typeof req.query[requiredFields[i]] === 'undefined' || req.query[requiredFields[i]] == '' || req.query[requiredFields[i]] == '\\0' || req.query[requiredFields[i]] == 0){
+                    callback(400, '\''+requiredFields[i]+'\' parameter cannot be null or empty');
+                    return;
+                }
+            }
+            if (ext != "json") {
+                callback(400, 'Bad request : Extension \''+ext+'\' not available');
+                return;
+            }
+            if (typeof sort !== 'undefined' && sort.toLowerCase() != "desc" && sort.toLowerCase() != "asc") {
+                callback(400, 'Sort parameter can be \'ASC\' or \'DESC\', not '+sort);
+                return;
+            }else if(typeof sort === 'undefined'){
+                sort = "ASC";
+            }
+            callback(null);
+        },
+
+        function(callback){
+            Lang.getLangsLimit(page, per_page, sort, function(l){
+                res.json({ code: 200, message: 'success', datas: l});
+            });
+        },
+
+    ],function(err, msg) {
+        if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+    });
+
+    
+
+    
+});
+
 module.exports = controller;
