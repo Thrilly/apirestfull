@@ -24,6 +24,8 @@ Domain.getDomain = function(dname, callback){
 
 Domain.setDomain = function(dname, desc, langs, user, callback){
 
+
+
     var datetime = app.datetime;
     var dt = datetime.create();
     datenow = dt.format('Y-m-d H:M:S');
@@ -35,8 +37,9 @@ Domain.setDomain = function(dname, desc, langs, user, callback){
         if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
 
         for (var k in langs) {
-            var sql2 = "INSERT INTO domain_lang VALUES ("+result.insertId+", '"+langs.k+"')";
-            app.con.query(sql, function (err, result2) {
+            var sql2 = "INSERT INTO domain_lang VALUES ("+result.insertId+", '"+langs[k]+"')";
+            console.log(sql2);
+            app.con.query(sql2, function (err, result2) {
                 if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
             });
         }
