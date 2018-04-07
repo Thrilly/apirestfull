@@ -512,7 +512,7 @@ controller.route('/domains.:ext')
             if (typeof req.header('Authorization') === 'undefined'){
                 callback(401, "Authorization is required");
                 return;
-            } else if (typeof req.header('Content-Type') === 'undefined' && typeof req.header('Content-Type') === 'undefined') {
+            } else if (typeof req.header('Content-Type') === 'undefined' && typeof req.header('Content-type') === 'undefined') {
                 callback(401, "Content-Type is required");
                 return;
             } else if (ext != "json") {
@@ -540,7 +540,7 @@ controller.route('/domains.:ext')
         },
 
         function(u, callback){
-            var requiredFields = ['trans', 'name', 'description'];
+            var requiredFields = ['lang', 'name', 'description'];
             for (var i = 0; i < requiredFields.length; i++) {
                 if(typeof req.body[requiredFields[i]] === 'undefined' || req.body[requiredFields[i]] == '' || req.body[requiredFields[i]] == '\\0'){
                     callback(400, '\''+requiredFields[i]+'\' parameter is missing');
@@ -552,34 +552,36 @@ controller.route('/domains.:ext')
 
         function(u, callback){
             Lang.getRegexLangs(function(reg){
-                if (typeof req.body.trans != "object") {
-                    callback(400, '\'trans\' need to be an array');
+                if (typeof req.body.lang != "object") {
+                    callback(400, '\'lang\' need to be an array');
                     return;
                 }else{
                     var langs = [];
-                    for (var k in req.body.trans){
+                    for (var k in req.body.lang){
                         var regex = RegExp('^['+reg+']{2}$');
-                        console.log(regex.test(req.body.trans[k]));
-                        if (regex.test(req.body.trans[k]) === false) {
+
+                        if (req.body.lang[k].length == 0 || req.body.lang[k] == "\0") {
+                            callback(400, '\'lang\' values cannot be empty');
+                            return;
+                        } 
+
+                        if (regex.test(req.body.lang[k]) === false) {
 
                             if (reg == '') {
                                 callback(400, "No lang is registered"); 
                                 return;
                             }
-                            callback(400, "Unknow lang "+req.body.trans[k]+", \'trans\' need registered iso code values ("+reg+")");
+                            callback(400, "Unknow lang "+req.body.lang[k]+", \'lang\' need registered iso code values ("+reg+")");
                             return;
                         }
-                        if (req.body.trans[k].length == 0 || req.body.trans[k] == "\0") {
-                            callback(400, '\'trans\' values cannot be empty');
-                            return;
-                        } 
+                        
                         for (var l in langs){
-                            if (langs[l] == req.body.trans[k]) {
-                                callback(400, "Cannot duplicate lang "+req.body.trans[k]);
+                            if (langs[l] == req.body.lang[k]) {
+                                callback(400, "Cannot duplicate lang "+req.body.lang[k]);
                                 return;
                             }
                         }
-                        langs.push(req.body.trans[k]);
+                        langs.push(req.body.lang[k]);
                     }
                     callback(null, u, langs);
                 }
@@ -592,6 +594,7 @@ controller.route('/domains.:ext')
                     res.status(201).json({ code: 201, message: 'success', datas: result});
                 }else{
                     callback(400, result.error);
+                    return;
                 }
             });
         },
