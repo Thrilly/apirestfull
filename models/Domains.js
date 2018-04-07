@@ -11,7 +11,7 @@ Domain.getDomains = function(callback){
 };
 
 Domain.getDomain = function(dname, callback){
-	var sql = "SELECT * FROM domain where name = '"+dname+"'";
+	var sql = "SELECT * FROM domain where slug = '"+dname+"'";
     app.con.query(sql, function (err, result) {
        	// if (err) throw err;
        	if (result.length != 0) {
@@ -39,7 +39,6 @@ Domain.setDomain = function(dname, desc, langs, user, callback){
 
         for (var k in langs) {
             var sql2 = "INSERT INTO domain_lang VALUES ("+result.insertId+", '"+langs[k]+"')";
-            console.log(sql2);
             app.con.query(sql2, function (err, result2) {
                 if (err) return callback({error: "SQL MESSAGE : "+err.sqlMessage})
             });

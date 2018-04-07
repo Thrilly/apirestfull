@@ -1,6 +1,8 @@
 var app = require("../config/config");
 var controller = app.express.Router();
 var async = app.async;
+var xliffconv = app.xliffconv;
+
 
 var Domain = app.model.domains;
 var User = app.model.users;
@@ -721,10 +723,6 @@ controller.route('/langs.:ext')
                     return;
                 }
             }
-            if (ext != "json") {
-                callback(400, 'Bad request : Extension \''+ext+'\' not available');
-                return;
-            }
             if (typeof sort !== 'undefined' && sort.toLowerCase() != "desc" && sort.toLowerCase() != "asc") {
                 callback(400, 'Sort parameter can be \'ASC\' or \'DESC\', not '+sort);
                 return;
@@ -748,5 +746,61 @@ controller.route('/langs.:ext')
 
     
 });
+
+// ####################### ROUTE 12 #######################
+
+// controller.route('/domains/:domain/langs/:lang.:ext')
+
+// .get(function(req, res) {
+
+//     var ext = req.params.ext;
+//     var domain = req.params.domain;
+//     var lang = req.params.lang;
+//     var sort = req.params.sort;
+
+//     async.waterfall([
+
+//         function(callback){
+//             Domain.getDomain(domain, function(d){
+//                 if (ext != "xliff") {
+//                     callback(400, 'Bad request : Extension \''+ext+'\' not available');
+//                     return;
+//                 }else if (!d){
+//                     callback(404, 'Not Found : Unknow domain \''+domain+'\''); 
+//                     return;
+//                 }else{
+//                     callback(null, d); 
+//                 }
+//             });
+//         },
+
+//         function(d, callback){
+//             Lang.getDomainLangById(d.id, lang, function(l){
+//                 if(!l){
+//                     callback(400, "No lang with id "+lang+" in this domain");
+//                 }
+//                 callback(null, d);
+//             });
+//         },
+
+//         function(d, callback){
+//             var js = {"resources" : d};
+//             console.log(js);
+//             xliffconv(js, (err, res) => {
+//                 res.set({
+//                     'Content-Type': 'application/xliff',
+//                 })
+//                 res.send(res);
+//             });
+//         },
+
+//     ],function(err, msg) {
+//         if (err == 400) { res.status(err).json({ code: err, message: msg, datas:[]})} else {res.status(err).json({ code: err, message: msg})}
+//     });
+
+    
+
+    
+// });
 
 module.exports = controller;

@@ -7,6 +7,7 @@ exports.path 			= require('path')
 exports.bodyParser 		= require('body-parser')
 exports.async 			= require('async')
 exports.datetime		= require('node-datetime');
+exports.xliffconv		= require('xliff/js2xliff');
 
 exports.express         = require('express');
 exports.con             = mysql.createConnection(params.db);
