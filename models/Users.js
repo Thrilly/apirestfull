@@ -24,7 +24,12 @@ User.authenticate = function(password, domain_id, callback){
     app.con.query(sql, function (err, result) {
        if (err) throw err;
        if (result.length == 0) return callback(false);
-       return callback(result[0].id);
+       for (var k in result){
+        if (result[k].id == domain_id){
+          return callback(result[k].id);
+        }
+       }
+       return callback(0);
     });
 };
 
